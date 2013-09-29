@@ -30,8 +30,8 @@ public class ComplexAnimationSwingApp extends JFrame implements ActionListener {
 	JFrame manDrawing = new JFrame();
 	StickMan man = new StickMan();
 
+	Thread jumpAnimator;
 	
-
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -49,10 +49,9 @@ public class ComplexAnimationSwingApp extends JFrame implements ActionListener {
 		bg.setFocusTraversalKeysEnabled(false);
 		bg.setResizable(false);
 		bg.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		bg.getContentPane().add(man.draw);
+		bg.getContentPane().add(draw);
 		bg.setSize(1280, 800);
 		bg.setVisible(true);
-		man.draw.repaint();
 	}
 
 	public synchronized void playMusic() {
@@ -69,18 +68,108 @@ public class ComplexAnimationSwingApp extends JFrame implements ActionListener {
 
 	class DrawPanel extends JPanel {
 		private static final long serialVersionUID = -9091687230503558275L;
-
 		public void paintComponent(Graphics g) {
-
+			if (man.getVelocityY() == 10 && man.isJumpOnce() == false) {
+				man.setJumpOnce(true);
+				jumpAnimator = new Thread(new Animator());
+				jumpAnimator.start();
+			}
 			timer.start();
-
-//			Image background = new ImageIcon("background.png").getImage();
-//			g.drawImage(background, xBackground, 0, this);
-//			g.drawImage(background, xBackground + 1280, 0, this);
-//			g.drawImage(background, xBackground - 1280, 0, this);
+			man.imagesRight[0] = new ImageIcon("walk1.png").getImage();
+			man.imagesRight[1] = new ImageIcon("walk2.png").getImage();
+			man.imagesRight[2] = new ImageIcon("walk3.png").getImage();
+			man.imagesLeft[0] = new ImageIcon("walk2left.png").getImage();
+			man.imagesLeft[1] = new ImageIcon("walk1left.png").getImage();
+			man.imagesLeft[2] = new ImageIcon("walk3left.png").getImage();
+			man.imagesCrouchingLeft[0] = new ImageIcon("crouchleft.png").getImage();
+			man.imagesCrouchingLeft[1] = new ImageIcon("crouch2left.png")
+					.getImage();
+			man.imagesCrouchingLeft[2] = new ImageIcon("crouch3left.png")
+					.getImage();
+			man.imagesCrouchingRight[0] = new ImageIcon("crouch.png").getImage();
+			man.imagesCrouchingRight[1] = new ImageIcon("crouch2right.png")
+					.getImage();
+			man.imagesCrouchingRight[2] = new ImageIcon("crouch3right.png")
+					.getImage();
 			
-			man.draw.repaint();
+			man.setManWalkingRight(new ImageIcon(man.getNextImageRight())
+			.getImage());
+			man.setManWalkingLeft(new ImageIcon(man.getNextImageLeft()).getImage());
+			man.setManCrouchingAndWalkingLeft(new ImageIcon(
+					man.getNextImageCrouchingLeft()).getImage());
+			man.setManCrouchingAndWalkingRight(new ImageIcon(
+					man.getNextImageCrouchingRight()).getImage());
+			man.setManJumpingRight(new ImageIcon("jump.png").getImage());
+			man.setManJumpingLeft(new ImageIcon("jumpleft.png").getImage());
+			man.setManStillRight(new ImageIcon("walk2.png").getImage());
+			man.setManCrouchingRight(new ImageIcon("crouch.png").getImage());
+			man.setManStillLeft(new ImageIcon("walk2left.png").getImage());
+			man.setManCrouchingLeft(new ImageIcon("crouchleft.png").getImage());
 
+			Image background = new ImageIcon("background.png").getImage();
+			g.drawImage(background, man.getxBackground(), 0, this);
+			g.drawImage(background, man.getxBackground() + 1280, 0, this);
+
+			try {
+				if (man.getVelocityX() > 0) {
+					if (man.isWalking() == true && man.isJumping() == false
+							&& man.isCrouching() == false)
+						g.drawImage(man.getManWalkingRight(), man.getX(), man.getY(), this);
+					else if (man.isWalking() == false && man.isJumping() == false
+							&& man.isCrouching() == false
+							&& man.isCrouchingAndWalking() == false)
+						g.drawImage(man.getManStillRight(), man.getX(), man.getY(), this);
+					else if (man.isJumping() == true)
+						g.drawImage(man.getManJumpingRight(), man.getX(), man.getY(), this);
+					else if (man.isCrouching() == true)
+						g.drawImage(man.getManCrouchingRight(), man.getX(), man.getY() + 27, this);
+					else if (man.isCrouchingAndWalking() == true)
+						g.drawImage(man.getManCrouchingAndWalkingRight(), man.getX(), man.getY() + 27,
+								this);
+				} else if (man.getVelocityX() < 0) {
+					if (man.isWalking() == true && man.isJumping() == false
+							&& man.isCrouching() == false)
+						g.drawImage(man.getManWalkingLeft(), man.getX(), man.getY(), this);
+					else if (man.isWalking() == false && man.isJumping() == false
+							&& man.isCrouching() == false
+							&& man.isCrouchingAndWalking() == false)
+						g.drawImage(man.getManStillLeft(), man.getX(), man.getY(), this);
+					else if (man.isJumping() == true)
+						g.drawImage(man.getManJumpingLeft(), man.getX(), man.getY(), this);
+					else if (man.isCrouching() == true)
+						g.drawImage(man.getManCrouchingLeft(), man.getX(), man.getY() + 27, this);
+					else if (man.isCrouchingAndWalking() == true)
+						g.drawImage(man.getManCrouchingAndWalkingLeft(), man.getX(), man.getY() + 27, this);
+				} else if (man.getVelocityX() == 0 && man.getDirectionBefore() == 1) {
+					if (man.isCrouching() == true)
+						g.drawImage(man.getManCrouchingRight(), man.getX(), man.getY() + 27, this);
+					else if (man.isJumping() == true)
+						g.drawImage(man.getManJumpingRight(), man.getX(), man.getY(), this);
+					else if (man.isWalking() == false && man.isJumping() == false
+							&& man.isCrouching() == false
+							&& man.isCrouchingAndWalking() == false)
+						g.drawImage(man.getManStillRight(), man.getX(), man.getY(), this);
+				} else if (man.getVelocityX() == 0 && man.getDirectionBefore() == -1) {
+					if (man.isCrouching() == true)
+						g.drawImage(man.getManCrouchingLeft(), man.getX(), man.getY() + 27, this);
+					else if (man.isJumping() == true)
+						g.drawImage(man.getManJumpingLeft(), man.getX(), man.getY(), this);
+					else if (man.isWalking() == false && man.isJumping() == false
+							&& man.isCrouching() == false
+							&& man.isCrouchingAndWalking() == false)
+						g.drawImage(man.getManStillLeft(), man.getX(), man.getY(), this);
+				} else if (man.getVelocityX() == 0 && man.getDirectionBefore() == 0) {
+					if (man.isCrouching() == true)
+						g.drawImage(man.getManCrouchingRight(), man.getX(), man.getY() + 27, this);
+					else if (man.isJumping() == true)
+						g.drawImage(man.getManJumpingRight(), man.getX(), man.getY(), this);
+					else if (man.isWalking() == false && man.isJumping() == false
+							&& man.isCrouching() == false
+							&& man.isCrouchingAndWalking() == false)
+						g.drawImage(man.getManStillRight(), man.getX(), man.getY(), this);
+				}
+			} finally {
+			}
 		}
 	}
 
@@ -104,13 +193,13 @@ public class ComplexAnimationSwingApp extends JFrame implements ActionListener {
 				man.setCrouchingAndWalking(false);
 				man.setDirectionBefore(1);
 				man.walk();
-				man.jump();
+				cycle();
 				if (man.getxBackground() > bg.getWidth() * -1) {
 					man.setxBackground(man.getxBackground() - man.getVelocityX());
 				} else {
 					man.setxBackground(0);
 				}
-
+				draw.repaint();
 			}
 
 			else if (pressed.contains(KeyEvent.VK_UP)
@@ -124,7 +213,8 @@ public class ComplexAnimationSwingApp extends JFrame implements ActionListener {
 				man.setCrouchingAndWalking(false);
 				man.setDirectionBefore(-1);
 				man.walk();
-				man.jump();
+				cycle();
+				draw.repaint();
 				} else if (pressed.contains(KeyEvent.VK_DOWN)
 					&& pressed.contains(KeyEvent.VK_RIGHT)) {
 				man.setVelocityX(10 + man.getSpeed());
@@ -139,6 +229,7 @@ public class ComplexAnimationSwingApp extends JFrame implements ActionListener {
 				} else {
 					man.setxBackground(0);
 				}
+				draw.repaint();
 			}
 
 			else if (pressed.contains(KeyEvent.VK_DOWN)
@@ -150,6 +241,7 @@ public class ComplexAnimationSwingApp extends JFrame implements ActionListener {
 				man.setCrouchingAndWalking(true);
 				man.setDirectionBefore(-1);
 				man.walk();
+				draw.repaint();
 			}
 
 			else if (pressed.contains(KeyEvent.VK_RIGHT)) {
@@ -165,6 +257,7 @@ public class ComplexAnimationSwingApp extends JFrame implements ActionListener {
 				} else {
 					man.setxBackground(0);
 				}
+				draw.repaint();
 			}
 
 			else if (pressed.contains(KeyEvent.VK_LEFT)) {
@@ -175,13 +268,16 @@ public class ComplexAnimationSwingApp extends JFrame implements ActionListener {
 				man.setCrouchingAndWalking(false);
 				man.setDirectionBefore(-1);
 				man.walk();
+				draw.repaint();
 			} else if (pressed.contains(KeyEvent.VK_UP)) {
 				man.setVelocityY(10);
-				man.jump();
 				man.setWalking(false);
 				man.setJumping(true);
 				man.setCrouching(false);
 				man.setCrouchingAndWalking(false);
+				draw.repaint();
+				cycle();
+				
 			} else if (pressed.contains(KeyEvent.VK_DOWN)) {
 				man.setVelocityX(0);
 				man.setWalking(false);
@@ -189,6 +285,7 @@ public class ComplexAnimationSwingApp extends JFrame implements ActionListener {
 				man.setCrouching(true);
 				man.setCrouchingAndWalking(false);
 				man.walk();
+				draw.repaint();
 			} else if (pressed.contains(KeyEvent.VK_D)) {
 				man.setSpeed(man.getSpeed() + 2);
 			} else if (pressed.contains(KeyEvent.VK_A)) {
@@ -217,6 +314,29 @@ public class ComplexAnimationSwingApp extends JFrame implements ActionListener {
 				man.setCrouching(false);
 				man.setCrouchingAndWalking(false);
 			}
+			else if (pressed.contains(KeyEvent.VK_DOWN)) {
+				//man.setVelocityX(0);
+				man.setWalking(false);
+				man.setJumping(false);
+				man.setCrouching(false);
+				man.setCrouchingAndWalking(false);
+			}
+			else if (pressed.contains(KeyEvent.VK_UP)
+					&& pressed.contains(KeyEvent.VK_LEFT)) {
+				man.setVelocityX(0);
+				man.setWalking(false);
+				man.setJumping(false);
+				man.setCrouching(false);
+				man.setCrouchingAndWalking(false);
+			}
+			else if (pressed.contains(KeyEvent.VK_UP)
+					&& pressed.contains(KeyEvent.VK_RIGHT)) {
+				man.setVelocityX(0);
+				man.setWalking(false);
+				man.setJumping(false);
+				man.setCrouching(false);
+				man.setCrouchingAndWalking(false);
+			}
 			pressed.remove(e.getKeyCode());
 
 		}
@@ -224,5 +344,49 @@ public class ComplexAnimationSwingApp extends JFrame implements ActionListener {
 		public synchronized void keyTyped(KeyEvent e) {
 		}
 	}
+	public class Animator implements Runnable {
 
+		@Override
+		public void run() {
+			long beforeTime, deltaTime, sleepTime;
+			beforeTime = System.currentTimeMillis();
+			while (man.isDoneJumping() == false) {
+				cycle();
+				deltaTime = System.currentTimeMillis() - beforeTime;
+				sleepTime = 10 - deltaTime;
+				if (sleepTime < 0) {
+					sleepTime = 2;
+				}
+				try {
+					Thread.sleep(sleepTime);
+				} catch (Exception e) {
+				}
+				beforeTime = System.currentTimeMillis();
+			}
+			man.setDoneJumping(false);
+			man.setAtPeak(false);
+			man.setJumpOnce(false);
+		}
+
+	}
+	
+	public void cycle() {
+
+		if (man.isAtPeak() == false) {
+			man.setJumping(true);
+			man.setY(man.getY() - 4);
+		}
+		if (man.getY() <= 380) {
+			man.setAtPeak(true);
+		}
+		if (man.isAtPeak() == true && man.getY() <= 510) {
+			man.setJumping(true);
+			man.setY(man.getY() + 4);
+			if (man.getY() == 510) {
+				man.setJumping(false);
+				man.setDoneJumping(true);
+			}
+		}
+		draw.repaint();
+	}
 }

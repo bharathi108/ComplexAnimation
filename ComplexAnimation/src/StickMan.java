@@ -21,7 +21,111 @@ public class StickMan implements ActionListener {
 	boolean isJumping = false;
 	boolean isCrouching = false;
 	boolean isCrouchingAndWalking = false;
+	
+	boolean isDoneJumping;
+	boolean isAtPeak;
+	boolean jumpOnce = false;
 
+	public Image[] imagesRight = new Image[3];
+	public Image[] imagesLeft = new Image[3];
+	public Image[] imagesCrouchingLeft = new Image[3];
+	public Image[] imagesCrouchingRight = new Image[3];
+	Image manWalkingRight;
+	Image manWalkingLeft;
+	Image manCrouchingAndWalkingLeft;
+	Image manCrouchingAndWalkingRight;
+	Image manJumpingRight;
+	Image manStillRight;
+	Image manCrouchingRight;
+	Image manJumpingLeft;
+	Image manStillLeft;
+	Image manCrouchingLeft;
+	private int current = 0;
+
+	public StickMan() {
+	}
+
+	public Image getManWalkingRight() {
+		return manWalkingRight;
+	}
+
+	public void setManWalkingRight(Image manWalkingRight) {
+		this.manWalkingRight = manWalkingRight;
+	}
+
+	public Image getManWalkingLeft() {
+		return manWalkingLeft;
+	}
+
+	public void setManWalkingLeft(Image manWalkingLeft) {
+		this.manWalkingLeft = manWalkingLeft;
+	}
+
+	public Image getManCrouchingAndWalkingLeft() {
+		return manCrouchingAndWalkingLeft;
+	}
+
+	public void setManCrouchingAndWalkingLeft(Image manCrouchingAndWalkingLeft) {
+		this.manCrouchingAndWalkingLeft = manCrouchingAndWalkingLeft;
+	}
+
+	public Image getManCrouchingAndWalkingRight() {
+		return manCrouchingAndWalkingRight;
+	}
+
+	public void setManCrouchingAndWalkingRight(Image manCrouchingAndWalkingRight) {
+		this.manCrouchingAndWalkingRight = manCrouchingAndWalkingRight;
+	}
+
+	public Image getManJumpingRight() {
+		return manJumpingRight;
+	}
+
+	public void setManJumpingRight(Image manJumpingRight) {
+		this.manJumpingRight = manJumpingRight;
+	}
+
+	public Image getManStillRight() {
+		return manStillRight;
+	}
+
+	public void setManStillRight(Image manStillRight) {
+		this.manStillRight = manStillRight;
+	}
+
+	public Image getManCrouchingRight() {
+		return manCrouchingRight;
+	}
+
+	public void setManCrouchingRight(Image manCrouchingRight) {
+		this.manCrouchingRight = manCrouchingRight;
+	}
+
+	public Image getManJumpingLeft() {
+		return manJumpingLeft;
+	}
+
+	public void setManJumpingLeft(Image manJumpingLeft) {
+		this.manJumpingLeft = manJumpingLeft;
+	}
+
+	public Image getManStillLeft() {
+		return manStillLeft;
+	}
+
+	public void setManStillLeft(Image manStillLeft) {
+		this.manStillLeft = manStillLeft;
+	}
+
+	public Image getManCrouchingLeft() {
+		return manCrouchingLeft;
+	}
+
+	public void setManCrouchingLeft(Image manCrouchingLeft) {
+		this.manCrouchingLeft = manCrouchingLeft;
+	}
+
+	
 	public int getxBackground() {
 		return xBackground;
 	}
@@ -29,16 +133,6 @@ public class StickMan implements ActionListener {
 	public void setxBackground(int xBackground) {
 		this.xBackground = xBackground;
 	}
-
-	Thread animator;
-
-	boolean k = false;
-	boolean doneJumping = false;
-	boolean isAtPeak = false;
-
-	Timer timer = new Timer(500, this);
-
-	DrawPanel draw = new DrawPanel();
 
 	public int getX() {
 		return x;
@@ -120,20 +214,40 @@ public class StickMan implements ActionListener {
 		this.isCrouchingAndWalking = isCrouchingAndWalking;
 	}
 
-	public boolean isK() {
-		return k;
+	public Image getNextImageRight() {
+		if (current == imagesRight.length) {
+			current = 0;
+		}
+		return imagesRight[current++];
 	}
 
-	public void setK(boolean k) {
-		this.k = k;
+	public Image getNextImageLeft() {
+		if (current == imagesLeft.length) {
+			current = 0;
+		}
+		return imagesLeft[current++];
+	}
+
+	public Image getNextImageCrouchingLeft() {
+		if (current == imagesCrouchingLeft.length) {
+			current = 0;
+		}
+		return imagesCrouchingLeft[current++];
+	}
+
+	public Image getNextImageCrouchingRight() {
+		if (current == imagesCrouchingRight.length) {
+			current = 0;
+		}
+		return imagesCrouchingRight[current++];
 	}
 
 	public boolean isDoneJumping() {
-		return doneJumping;
+		return isDoneJumping;
 	}
 
-	public void setDoneJumping(boolean doneJumping) {
-		this.doneJumping = doneJumping;
+	public void setDoneJumping(boolean isDoneJumping) {
+		this.isDoneJumping = isDoneJumping;
 	}
 
 	public boolean isAtPeak() {
@@ -144,213 +258,29 @@ public class StickMan implements ActionListener {
 		this.isAtPeak = isAtPeak;
 	}
 
+	public boolean isJumpOnce() {
+		return jumpOnce;
+	}
+
+	public void setJumpOnce(boolean jumpOnce) {
+		this.jumpOnce = jumpOnce;
+	}
+
+	
 	public void walk() {
 
 		x = x + velocityX;
-		if (x == 1250 && velocityX > 0) {
-			velocityX = 0;
+		if (x >= 1300 && velocityX > 0) {
+			x = -100;
 			x = x + velocityX;
-		} else if (x == 10 && velocityX < 0) {
-			velocityX = 0;
+		} else if (x <= -100  && velocityX < 0) {
+			x = 1300;
 			x = x + velocityX;
 		}
-		draw.repaint();
-	}
-
-	public void jump() {
-
-		if (isAtPeak == false) {
-			isJumping = true;
-			y -= 4;
-		}
-		if (y <= 380) {
-			isAtPeak = true;
-		}
-		if (isAtPeak == true && y <= 510) {
-			isJumping = true;
-			y += 4;
-			if (y == 510) {
-				isJumping = false;
-				doneJumping = true;
-			}
-		}
-		draw.repaint();
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		draw.repaint();
 
 	}
-
-	class DrawPanel extends JPanel {
-
-		private static final long serialVersionUID = -9091787230503558275L;
-		private Image[] imagesRight = new Image[3];
-		private Image[] imagesLeft = new Image[3];
-		private Image[] imagesCrouchingLeft = new Image[3];
-		private Image[] imagesCrouchingRight = new Image[3];
-
-		private int current = 0;
-
-		public Image getNextImageRight() {
-			if (current == imagesRight.length) {
-				current = 0;
-			}
-			return imagesRight[current++];
-		}
-
-		public Image getNextImageLeft() {
-			if (current == imagesLeft.length) {
-				current = 0;
-			}
-			return imagesLeft[current++];
-		}
-
-		public Image getNextImageCrouchingLeft() {
-			if (current == imagesCrouchingLeft.length) {
-				current = 0;
-			}
-			return imagesCrouchingLeft[current++];
-		}
-
-		public Image getNextImageCrouchingRight() {
-			if (current == imagesCrouchingRight.length) {
-				current = 0;
-			}
-			return imagesCrouchingRight[current++];
-		}
-
-		public void paintComponent(Graphics g) {
-
-			if (velocityY == 10 && k == false) {
-				k = true;
-				animator = new Thread(new animator());
-				animator.start();
-			}
-			timer.start();
-			Image background = new ImageIcon("background.png").getImage();
-			imagesRight[0] = new ImageIcon("walk1.png").getImage();
-			imagesRight[1] = new ImageIcon("walk2.png").getImage();
-			imagesRight[2] = new ImageIcon("walk3.png").getImage();
-			imagesLeft[0] = new ImageIcon("walk2left.png").getImage();
-			imagesLeft[1] = new ImageIcon("walk1left.png").getImage();
-			imagesLeft[2] = new ImageIcon("walk3left.png").getImage();
-			imagesCrouchingLeft[0] = new ImageIcon("crouchleft.png").getImage();
-			imagesCrouchingLeft[1] = new ImageIcon("crouch2left.png")
-					.getImage();
-			imagesCrouchingLeft[2] = new ImageIcon("crouch3left.png")
-					.getImage();
-			imagesCrouchingRight[0] = new ImageIcon("crouch.png").getImage();
-			imagesCrouchingRight[1] = new ImageIcon("crouch2right.png")
-					.getImage();
-			imagesCrouchingRight[2] = new ImageIcon("crouch3right.png")
-					.getImage();
-			Image manWalkingRight = new ImageIcon(getNextImageRight())
-					.getImage();
-			Image manWalkingLeft = new ImageIcon(getNextImageLeft()).getImage();
-			Image manCrouchingAndWalkingLeft = new ImageIcon(
-					getNextImageCrouchingLeft()).getImage();
-			Image manCrouchingAndWalkingRight = new ImageIcon(
-					getNextImageCrouchingRight()).getImage();
-			Image manJumpingRight = new ImageIcon("jump.png").getImage();
-			Image manStillRight = new ImageIcon("walk2.png").getImage();
-			Image manCrouchingRight = new ImageIcon("crouch.png").getImage();
-			Image manJumpingLeft = new ImageIcon("jumpleft.png").getImage();
-			Image manStillLeft = new ImageIcon("walk2left.png").getImage();
-			Image manCrouchingLeft = new ImageIcon("crouchleft.png").getImage();
-			g.drawImage(background, xBackground, 0, this);
-			g.drawImage(background, xBackground + 1280, 0, this);
-			g.drawImage(background, xBackground - 1280, 0, this);
-
-			// Image cloud1 = new ImageIcon("cloud.png").getImage();
-			try {
-				if (velocityX > 0) {
-					if (isWalking == true && isJumping == false
-							&& isCrouching == false)
-						g.drawImage(manWalkingRight, x, y, this);
-					else if (isWalking == false && isJumping == false
-							&& isCrouching == false
-							&& isCrouchingAndWalking == false)
-						g.drawImage(manStillRight, x, y, this);
-					else if (isJumping == true)
-						g.drawImage(manJumpingRight, x, y, this);
-					else if (isCrouching == true)
-						g.drawImage(manCrouchingRight, x, y + 27, this);
-					else if (isCrouchingAndWalking == true)
-						g.drawImage(manCrouchingAndWalkingRight, x, y + 27,
-								this);
-				} else if (velocityX < 0) {
-					if (isWalking == true && isJumping == false
-							&& isCrouching == false)
-						g.drawImage(manWalkingLeft, x, y, this);
-					else if (isWalking == false && isJumping == false
-							&& isCrouching == false
-							&& isCrouchingAndWalking == false)
-						g.drawImage(manStillLeft, x, y, this);
-					else if (isJumping == true)
-						g.drawImage(manJumpingLeft, x, y, this);
-					else if (isCrouching == true)
-						g.drawImage(manCrouchingLeft, x, y + 27, this);
-					else if (isCrouchingAndWalking == true)
-						g.drawImage(manCrouchingAndWalkingLeft, x, y + 27, this);
-				} else if (velocityX == 0 && directionBefore == 1) {
-					if (isCrouching == true)
-						g.drawImage(manCrouchingRight, x, y + 27, this);
-					else if (isJumping == true)
-						g.drawImage(manJumpingRight, x, y, this);
-					else if (isWalking == false && isJumping == false
-							&& isCrouching == false
-							&& isCrouchingAndWalking == false)
-						g.drawImage(manStillRight, x, y, this);
-				} else if (velocityX == 0 && directionBefore == -1) {
-					if (isCrouching == true)
-						g.drawImage(manCrouchingLeft, x, y + 27, this);
-					else if (isJumping == true)
-						g.drawImage(manJumpingLeft, x, y, this);
-					else if (isWalking == false && isJumping == false
-							&& isCrouching == false
-							&& isCrouchingAndWalking == false)
-						g.drawImage(manStillLeft, x, y, this);
-				} else if (velocityX == 0 && directionBefore == 0) {
-					if (isCrouching == true)
-						g.drawImage(manCrouchingRight, x, y + 27, this);
-					else if (isJumping == true)
-						g.drawImage(manJumpingRight, x, y, this);
-					else if (isWalking == false && isJumping == false
-							&& isCrouching == false
-							&& isCrouchingAndWalking == false)
-						g.drawImage(manStillRight, x, y, this);
-				}
-			} finally {
-			}
-		}
-	}
-
-	public class animator implements Runnable {
-
-		@Override
-		public void run() {
-			long beforeTime, deltaTime, sleepTime;
-			beforeTime = System.currentTimeMillis();
-			while (doneJumping == false) {
-				jump();
-				deltaTime = System.currentTimeMillis() - beforeTime;
-				sleepTime = 10 - deltaTime;
-				if (sleepTime < 0) {
-					sleepTime = 2;
-				}
-				try {
-					Thread.sleep(sleepTime);
-				} catch (Exception e) {
-				}
-				beforeTime = System.currentTimeMillis();
-			}
-			doneJumping = false;
-			isAtPeak = false;
-			k = false;
-		}
-
-	}
-
 }
