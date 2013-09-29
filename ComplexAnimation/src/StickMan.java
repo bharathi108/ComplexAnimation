@@ -270,12 +270,13 @@ public class StickMan implements ActionListener {
 	public void walk() {
 
 		x = x + velocityX;
-		if (x >= 1300 && velocityX > 0) {
-			x = -100;
-			x = x + velocityX;
-		} else if (x <= -100  && velocityX < 0) {
-			x = 1300;
-			x = x + velocityX;
+		if (x >= 0 && x <= 1220){
+			x = x + velocityX;	
+		}
+		else if (x >= 1220 && velocityX > 0) {
+			x = 1220;
+		} else if (x <= 0  && velocityX < 0) {
+			x = 0;
 		}
 	}
 
